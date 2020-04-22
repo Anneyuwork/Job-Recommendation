@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import external.GitHubClient;
 
 /**
  * Servlet implementation class SearchItem
@@ -31,9 +32,20 @@ public class SearchItem extends HttpServlet {
 	 */
     //use throws, since it was overriding from the parent: HttpServlet.class
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
+		//what parameter does request have, we see lat, lon, do we have a doc? GitHub API doc!
+		//description-need to according to the GitHub API doc!!not keyword
+		double lat = Double.parseDouble(request.getParameter("lat"));
+		double lon = Double.parseDouble(request.getParameter("lon"));
+
+		GitHubClient client = new GitHubClient();
+		
+		//???we didn't pass in the keyword, how to pass the keyword? 
+		//???String keyword = String.parseString(request.getParameter("keyword"));
+		//no need to be description ! based on API doc
+		RpcHelper.writeJsonArray(response, client.search(lat, lon, null));
+
 		/*interesting here, should return--but use void, and have return come as response
-		since response is already a instance created by Java and passed in, return is a string in JSON format*/
+		since response is already a instance created by Java and passed in, return is a string in JSON format
 		////tell front-end/response we will return JSON type
 		//response.setContentType("application/json");
 		////write and return to front end
@@ -46,9 +58,10 @@ public class SearchItem extends HttpServlet {
 		//.writeJsonArray is a static method, so helper or util usually use static
 		RpcHelper.writeJsonArray(response, array);
 		//writer.print(array);
-		
-		/*//here is request, .getParameter is getting parameter from request passed in
-		 * if (request.getParameter("username") != null) {
+		*/
+		/*
+		//here is request, .getParameter is getting parameter from request passed in
+		   if (request.getParameter("username") != null) {
 			JSONObject obj = new JSONObject();
 			String username = request.getParameter("username");
 			obj.put("username", username);
