@@ -2,6 +2,7 @@ package rpc;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -11,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import entity.Item;
 import external.GitHubClient;
 
 /**
@@ -31,18 +33,27 @@ public class SearchItem extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
     //use throws, since it was overriding from the parent: HttpServlet.class
+    //client.search() return List<Item>
+    //then write back to JSON Array
+    //RpcHelper() writeJsonArray--change JSON Array to JSON String and give back to response 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		//what parameter does request have, we see lat, lon, do we have a doc? GitHub API doc!
 		//description-need to according to the GitHub API doc!!not keyword
 		double lat = Double.parseDouble(request.getParameter("lat"));
 		double lon = Double.parseDouble(request.getParameter("lon"));
-
+		//here change the List of item back to JSONArray
 		GitHubClient client = new GitHubClient();
-		
+		List<Item> items = client.search(lat, lon, null);
+		JSONArray array = new JSONArray();
+		for (Item item : items) {
+			//.toJSONObject() in the item
+			array.put(item.toJSONObject());
+		}
+		RpcHelper.writeJsonArray(response, array);
 		//???we didn't pass in the keyword, how to pass the keyword? 
 		//???String keyword = String.parseString(request.getParameter("keyword"));
 		//no need to be description ! based on API doc
-		RpcHelper.writeJsonArray(response, client.search(lat, lon, null));
+		//RpcHelper.writeJsonArray(response, client.search(lat, lon, null));
 
 		/*interesting here, should return--but use void, and have return come as response
 		since response is already a instance created by Java and passed in, return is a string in JSON format
