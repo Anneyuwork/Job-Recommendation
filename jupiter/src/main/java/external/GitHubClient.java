@@ -61,8 +61,7 @@ public class GitHubClient {
 			//entity, might have metadata 
 			//entity.getContent() get the content, it is a stream, need to useInputStreamReader to read
 			//InputStreamReader only can do for certain length, what if 11?
-			//bufferReader read by line
-			//bufferReader need to take a reader, so need to create a reader
+			//bufferReader read by line, bufferReader need to take a reader, so need to create a reader
 			BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
 			//build response
 			StringBuilder responseBody = new StringBuilder();
@@ -94,6 +93,25 @@ public class GitHubClient {
 	//change JSON Array to list of item
 	private List<Item> getItemList(JSONArray array) {
 		List<Item> itemList = new ArrayList<>();
+		List<String> descriptionList = new ArrayList<>();
+		
+		for (int i = 0; i < array.length(); i++) {
+			// We need to extract keywords from description since GitHub API
+			// doesn't return keywords.
+			String description = getStringFieldOrEmpty(array.getJSONObject(i), "description");
+			if (description.equals("") || description.equals("\n")) {
+				descriptionList.add(getStringFieldOrEmpty(array.getJSONObject(i), "title"));
+			} else {
+				descriptionList.add(description);
+			}	
+		}
+
+		// We need to get keywords from multiple text in one request since
+		// MonkeyLearnAPI has limitations on request per minute.
+		//list of string -->array of string (MonkeyLearn like array of string, but java like list of string)
+		List<List<String>> keywords = MonkeyLearnClient
+				.extractKeywords(descriptionList.toArray(new String[descriptionList.size()]));
+		
 		for (int i = 0; i < array.length(); ++i) {
 			//get the jsonObject from the JSON Array
 			JSONObject object = array.getJSONObject(i);
@@ -110,6 +128,10 @@ public class GitHubClient {
 			builder.setAddress(getStringFieldOrEmpty(object, "location"));
 			builder.setUrl(getStringFieldOrEmpty(object, "url"));
 			builder.setImageUrl(getStringFieldOrEmpty(object, "company_logo"));
+			//keywords of hashset..
+			//List<String > list = keyword.get(i);
+			//builder.setKeywords(new HashSet <String> (List));
+			builder.setKeywords(new HashSet<String>(keywords.get(i)));
 			
 			Item item = builder.build();
 			itemList.add(item);
@@ -117,7 +139,7 @@ public class GitHubClient {
 		
 		return itemList;
 	}
-	//so we want to put "" instead of  null
+	//so we want to put "" instead of null
 	private String getStringFieldOrEmpty(JSONObject obj, String field) {
 		return obj.isNull(field) ? "" : obj.getString(field);
 	}

@@ -24,7 +24,6 @@ public class Item {
 		this.url = builder.url;
 		this.keywords = builder.keywords;
 	}
-
 	
 	public String getItemId() {
 		return itemId;
