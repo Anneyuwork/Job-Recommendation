@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import db.MySQLConnection;
 import entity.Item;
 import external.GitHubClient;
 
@@ -37,6 +38,7 @@ public class SearchItem extends HttpServlet {
     //then write back to JSON Array
     //RpcHelper() writeJsonArray--change JSON Array to JSON String and give back to response 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String userId = request.getParameter("user_id");
 		//what parameter does request have, we see lat, lon, do we have a doc? GitHub API doc!
 		//description-need to according to the GitHub API doc!!not keyword
 		double lat = Double.parseDouble(request.getParameter("lat"));
@@ -44,10 +46,23 @@ public class SearchItem extends HttpServlet {
 		//here change the List of item back to JSONArray
 		GitHubClient client = new GitHubClient();
 		List<Item> items = client.search(lat, lon, null);
+		
+		MySQLConnection connection = new MySQLConnection();
+		//why getFavoriteItemId() is public
+		Set<String> favoritedItemIds = connection.getFavoriteItemIds(userId);
+		connection.close();
+		
 		JSONArray array = new JSONArray();
 		for (Item item : items) {
+			JSONObject obj = item.toJSONObject();
+			//same consistency in ItemHistory.java
+			//not every item needs favorite true
+			//we need to use user id, get connection, 
+			//only when we have item_id, due to 
+			obj.put("favorite", favoritedItemIds.contains(item.getItemId()));
+			array.put(obj);
 			//.toJSONObject() in the item
-			array.put(item.toJSONObject());
+			//array.put(item.toJSONObject());
 		}
 		RpcHelper.writeJsonArray(response, array);
 		//???we didn't pass in the keyword, how to pass the keyword? 
