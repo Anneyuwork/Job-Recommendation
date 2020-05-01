@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -38,6 +39,12 @@ public class SearchItem extends HttpServlet {
     //then write back to JSON Array
     //RpcHelper() writeJsonArray--change JSON Array to JSON String and give back to response 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		HttpSession session = request.getSession(false);
+		if (session == null) {
+			response.setStatus(403);
+			return;
+		}
+		
 		String userId = request.getParameter("user_id");
 		//what parameter does request have, we see lat, lon, do we have a doc? GitHub API doc!
 		//description-need to according to the GitHub API doc!!not keyword
