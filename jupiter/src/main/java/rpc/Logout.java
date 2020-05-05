@@ -28,6 +28,8 @@ public class Logout extends HttpServlet {
     // getsession ()--False : return session   True : create new session
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+    	// session is storage in tomcat 
+    	//.getSession()here needs to pass false, if we have session, get this session, if not, return null
 		HttpSession session = request.getSession(false);
 		if (session != null) {
 			session.invalidate();

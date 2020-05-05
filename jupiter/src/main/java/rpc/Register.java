@@ -28,7 +28,7 @@ public class Register extends HttpServlet {
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
-    //get all information, save into database
+    //get new user's information, save into database
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		JSONObject input = RpcHelper.readJSONObject(request);
@@ -39,9 +39,10 @@ public class Register extends HttpServlet {
 
 		MySQLConnection connection = new MySQLConnection();
 		JSONObject obj = new JSONObject();
+		//.addUser, if success return true
 		if (connection.addUser(userId, password, firstname, lastname)) {
 			obj.put("status", "OK");
-		} else {
+		} else {//already exist, return false
 			obj.put("status", "User Already Exists");
 		}
 		connection.close();

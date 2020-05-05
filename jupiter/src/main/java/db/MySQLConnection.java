@@ -215,6 +215,8 @@ public class MySQLConnection {
 		return keywords;
 	}
 	
+	//used in login doGet
+	//database storage first name and last name, separate, this method return full name
 	public String getFullname(String userId) {
 		
 		if (conn == null) {
@@ -238,6 +240,7 @@ public class MySQLConnection {
 		return name;
 	}
 
+	//check if the login is matched 
 	public boolean verifyLogin(String userId, String password) {
 		if (conn == null) {
 			System.err.println("DB connection failed");
